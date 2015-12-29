@@ -4,23 +4,41 @@ convert_to_subvolume() {
     local dir="$(basename "$1")"
     local tmpname="${dir}.$(date +%s%N)"
 
-    btrfs subvolume create "$tmpname"
-    cp -auv --reflink "$dir/./" "$tmpname/"
-    rsync -aEHPX --delete "$dir/" "$tmpname/"
+    local cmd_btrfs cmd_cp cmd_rsync cmd_mv cmd_rm
+    cmd_btrfs="btrfs subvolume create"
+    cmd_cp="cp -a --reflink"
+    cmd_rsync="rsync -aEHPX --delete"
+    cmd_mv="mv"
+    cmd_rm="rm -rf"
 
-    mv -v "$dir" "${tmpname}.d"
-    mv -v "$tmpname" "$dir"
+    if [ -n "$VERBOSE" ]; then
+        cmd_cp+=" -v"
+        cmd_mv+=" -v"
+        cmd_rm+="v"
+    else
+        cmd_btrfs+=" >/dev/null"
+        cmd_rsync+=" -q"
+    fi
+
+    # Due to using output redirection, eval needs to be used
+    eval $cmd_btrfs \"$tmpname\"
+    $cmd_cp "$dir/./" "$tmpname/"
+    $cmd_rsync "$dir/" "$tmpname/"
+
+    $cmd_mv "$dir" "${tmpname}.d"
+    $cmd_mv "$tmpname" "$dir"
 
     if [ -z "$NOCONFIRM" ]; then
-        echo -n "rm -rfv \"${tmpname}.d\" ?"
+        echo -n "$cmd_rm \"${tmpname}.d\" ?"
         read
     fi
 
-    rm -rfv "${tmpname}.d"
+    $cmd_rm "${tmpname}.d"
 }
 
 while true; do
     case "$1" in
+        -v) VERBOSE=1;;
         -y) NOCONFIRM=1;;
         *) break;;
     esac
