@@ -10,10 +10,22 @@ convert_to_subvolume() {
 
     mv -v "$dir" "${tmpname}.d"
     mv -v "$tmpname" "$dir"
-    echo -n "rm -rfv \"${tmpname}.d\" ?"
-    read
+
+    if [ -z "$NOCONFIRM" ]; then
+        echo -n "rm -rfv \"${tmpname}.d\" ?"
+        read
+    fi
+
     rm -rfv "${tmpname}.d"
 }
+
+while true; do
+    case "$1" in
+        -y) NOCONFIRM=1;;
+        *) break;;
+    esac
+    shift
+done
 
 for dir in "$@"; do
     convert_to_subvolume "$dir"
