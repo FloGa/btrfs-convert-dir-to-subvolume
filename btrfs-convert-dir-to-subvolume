@@ -32,6 +32,14 @@ convert_to_subvolume() {
     $cmd_rm "${tmpname}.d"
 }
 
+while true; do
+    case "$1" in
+        -v) VERBOSE=1;;
+        *) break;;
+    esac
+    shift
+done
+
 for dir in "$@"; do
     convert_to_subvolume "$dir"
 done
