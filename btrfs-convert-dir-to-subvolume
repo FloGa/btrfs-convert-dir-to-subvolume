@@ -10,7 +10,7 @@ convert_to_subvolume() {
 
     mv -v "$dir" "${tmpname}.d"
     mv -v "$tmpname" "$dir"
-    echo -n rm -rfv "${tmpname}.d" ?
+    echo -n "rm -rfv \"${tmpname}.d\" ?"
     read
     rm -rfv "${tmpname}.d"
 }
