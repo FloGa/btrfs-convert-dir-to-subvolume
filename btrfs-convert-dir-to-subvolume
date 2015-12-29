@@ -4,7 +4,7 @@ convert_to_subvolume() {
     local dir="$(basename "$1")"
     local tmpname="${dir}.$(date +%s%N)"
 
-    btrfs subvolume create $tmpname
+    btrfs subvolume create "$tmpname"
     cp -auv --reflink "$dir/./" "$tmpname/"
     rsync -aEHPX --delete "$dir/" "$tmpname/"
 
